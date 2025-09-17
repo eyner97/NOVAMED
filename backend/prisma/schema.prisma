@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo maestro de Departamentos
+model Departamento {
+  id         String     @id
+  nombre     String
+  codigo     String?
+  createdAt  DateTime?
+  municipios Municipio[]
+}
+
+// Municipios (FK a Departamento)
+model Municipio {
+  id              String     @id
+  departamentoId  String
+  nombre          String
+  codigo          String?
+  createdAt       DateTime?
+
+  departamento Departamento @relation(fields: [departamentoId], references: [id])
+  puestos      PuestoSalud[]
+  rutas        RutaClinica[]
+}
+
+// Clínicas móviles
+model ClinicaMovil {
+  id          String       @id
+  nombre      String
+  descripcion String?
+  telefono    String?
+  activa      Boolean      @default(true)
+  createdAt   DateTime?
+  rutas       RutaClinica[]
+}
+
+// Puestos de salud (FK a Municipio)
+model PuestoSalud {
+  id          String   @id
+  nombre      String
+  tipo        String?     // enum en Supabase, string aquí
+  direccion   String?
+  telefono    String?
+  municipioId String
+  latitud     Float?
+  longitud    Float?
+
+  municipio Municipio @relation(fields: [municipioId], references: [id])
+}
+
+// Ruta de clínica (compatibilidad con tu API actual + campos que vienen de Supabase)
+model RutaClinica {
+  id             String   @id
+
+  // FKs sincronizadas
+  clinicaId      String?
+  municipioId    String?
+
+  // Datos de agenda
+  fecha          DateTime?
+  horaInicio     String?
+  horaFin        String?
+  puntoEncuentro String?
+
+  // Coordenadas (pueden venir de Supabase o usarse localmente)
+  latitud        Float?
+  longitud       Float?
+
+  // Campos “legado” (los usaba tu API actual)
+  nombre         String?
+  descripcion    String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinica    ClinicaMovil? @relation(fields: [clinicaId], references: [id])
+  municipio  Municipio?    @relation(fields: [municipioId], references: [id])
+}

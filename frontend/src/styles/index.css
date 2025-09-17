@@ -1,0 +1,28 @@
+/* Importar estilos de Leaflet primero */
+@import "leaflet/dist/leaflet.css";
+
+/* Tailwind base */
+@tailwind base;
+
+/* Tailwind components */
+@tailwind components;
+
+/* Tailwind utilities */
+@tailwind utilities;
+
+/* Estilos globales */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Asegurar que el mapa ocupe el espacio completo */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}

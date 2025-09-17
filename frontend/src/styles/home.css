@@ -1,0 +1,307 @@
+/* src/pages/home.css */
+/* Paleta: azul principal, verde botones, blanco para tarjetas */
+:root{
+  --blue: #2e61ab;
+  --blue-dark: #1d4a8a;
+  --green: #22a45d;
+  --white: #ffffff;
+  --muted: #dbe8ff;
+}
+
+/* Para una sola pantalla sin scroll */
+html, body { height: 100%; }
+body { margin: 0; overflow: hidden; }
+
+.hm-root, .hm-root * { box-sizing: border-box; }
+
+.hm-root {
+  height: 100svh;           /* ocupa exactamente la altura visible */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--blue);
+  color: var(--white);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  overflow: hidden;          /* evita scroll */
+}
+
+/* HEADER */
+.hm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 36px;
+}
+
+.hm-header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.hm-logo { 
+  display:flex; 
+  align-items:center; 
+  gap:10px; 
+  font-weight:700; 
+  color: #fff; 
+  font-size: 28px; 
+}
+.hm-logo-n { letter-spacing:1px; }
+
+/* Logo sin fondo, un poco más bajo que el texto */
+.hm-logo-img { 
+  height: 24px;             /* ligeramente menor que la altura del texto */
+  width: auto;
+  display: inline-block;
+  object-fit: contain;
+}
+
+.hm-logo-rest { margin-left: 0px; font-size: 28px; }
+
+.hm-slogan { color: rgba(255,255,255,0.85); font-weight: 300; font-size: 0.95rem; margin-top: 2px; }
+
+/* avatar top right */
+.hm-header-right { display:flex; align-items:center; gap:12px; }
+.hm-avatar-wrap { width:72px; height:72px; border-radius:50%; border:4px solid rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 14px rgba(0,0,0,0.12); background: rgba(255,255,255,0.04); }
+.hm-avatar { width:64px; height:64px; border-radius:50%; object-fit:cover; }
+
+/* MAIN */
+.hm-main { 
+  flex:1; 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  justify-content:center; 
+  padding: 8px 16px 16px; 
+  gap: 16px; 
+}
+
+.hm-hero { text-align:center; max-width: 1100px; width:100%; padding: 0 12px; }
+.hm-hero-sub { font-size: clamp(18px, 2vw, 28px); margin: 0; font-weight: 600; text-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+.hm-hero-title { font-size: clamp(30px, 5.4vw, 64px); margin: 6px 0 14px; font-weight: 700; text-shadow: 0 10px 18px rgba(0,0,0,0.2); letter-spacing: -0.03em; }
+
+/* Input pill */
+.hm-input-wrap {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin: 6px auto 0;
+  width: min(820px, 86%);
+  height: 64px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245,248,255,0.95));
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  padding: 0 6px;
+  position: relative;
+}
+
+.hm-input {
+  flex:1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 12px 22px;
+  font-size: 1.05rem;
+  color: #16324a;
+  border-radius: 999px;
+  font-weight: 400;
+}
+
+/* Botón de enviar un poco más pequeño que antes */
+.hm-send {
+  width:56px;
+  height:56px;
+  border-radius: 999px;
+  border: none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-left: 8px;
+  background: var(--blue-dark);
+  color: var(--white);
+  cursor:pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+  transition: transform .16s ease, box-shadow .16s ease, background .12s ease;
+}
+
+.hm-send:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,0.28); background: #123a74; }
+
+.hm-send-icon { width:22px; height:22px; }
+
+/* sintomas links */
+.hm-sintomas { margin-top:8px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.hm-sintoma-link {
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.9);
+  text-decoration: underline;
+  font-size: 0.95rem;
+  cursor:pointer;
+  padding: 6px 8px;
+  transition: color .14s ease, transform .12s;
+}
+.hm-sintoma-link:hover { color: #fff; transform: translateY(-2px); }
+
+/* CARDS / TRES BOTONES EQUILIBRADOS EN UNA SOLA FILA */
+.hm-cards {
+  width: 100%;
+}
+
+.hm-cards-3 {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: stretch;
+}
+
+.hm-card {
+  height: 100px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+  cursor:pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+  border: none;
+  background: var(--white);
+  color: var(--blue);
+  font-weight: 700;
+  text-align:left;
+}
+
+.hm-card .hm-card-icon {
+  width:64px;
+  height:64px;
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  margin-right: 8px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  background: #fff;
+}
+
+.hm-card .hm-svg { width:34px; height:34px; display:block; }
+
+.hm-card-text { font-size: 1.05rem; }
+
+/* variantes */
+.hm-card-green { background: linear-gradient(180deg, var(--green), #1f8a4a); color: #fff; }
+.hm-card-green .hm-card-icon { background: rgba(255,255,255,0.08); }
+.hm-card-white { background: var(--white); color: var(--blue); }
+.hm-card-white .hm-card-icon { background: #fff; }
+
+/* Hover effects */
+.hm-card:hover { transform: translateY(-8px); box-shadow: 0 20px 38px rgba(0,0,0,0.28); }
+
+/* FOOTER */
+.hm-footer {
+  background: #fff;
+  color: var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 28px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.hm-footer-left { display:flex; align-items:center; gap:10px; }
+.hm-footer-pin { width:22px; height:22px; }
+.hm-location { font-weight:600; }
+
+.hm-user-circle { width:44px; height:44px; border-radius:50%; background: var(--blue); display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
+
+/* RESPONSIVE — asegurando una sola pantalla sin scroll */
+@media (max-width: 900px) {
+  .hm-header { padding: 16px; }
+  .hm-avatar-wrap { width:56px; height:56px; }
+  .hm-logo-rest, .hm-logo-n { font-size:22px; }
+  .hm-logo-img { height: 20px; }
+  .hm-hero-title { font-size: clamp(24px, 6.2vw, 44px); }
+  .hm-cards-3 { gap: 16px; max-width: 820px; }
+  .hm-card { height: 92px; padding: 12px; }
+  .hm-card .hm-card-icon { width:56px; height:56px; }
+}
+
+@media (max-width: 640px) {
+  .hm-header { padding: 12px; }
+  .hm-hero-title { font-size: clamp(22px, 7.2vw, 36px); }
+  .hm-input-wrap { height: 56px; }
+  .hm-send { width: 52px; height: 52px; }
+  /* Mantener 3 columnas pero compactas para evitar scroll */
+  .hm-cards-3 { 
+    gap: 12px; 
+    max-width: 100%;
+    padding: 0 4px;
+  }
+  .hm-card { 
+    height: 84px; 
+    padding: 10px; 
+  }
+  .hm-card .hm-card-icon { width:48px; height:48px; }
+  .hm-card .hm-svg { width:28px; height:28px; }
+  .hm-card-text { font-size: 0.95rem; }
+  .hm-footer { padding: 8px 14px; font-size: 0.9rem; }
+}
+
+/* Pantallas algo bajas */
+@media (max-height: 800px) {
+  .hm-header { padding: 14px 20px; }
+  .hm-hero-title { margin: 4px 0 10px; }
+  .hm-input-wrap { height: 56px; }
+  .hm-send { width: 50px; height: 50px; }
+  .hm-sintomas { margin-top: 6px; }
+  .hm-cards-3 { margin-top: 16px; gap: 16px; }
+  .hm-card { height: 90px; padding: 12px 14px; }
+  .hm-footer { padding: 10px 18px; }
+}
+
+/* Pantallas bajas */
+@media (max-height: 700px) {
+  .hm-avatar-wrap { width: 56px; height: 56px; }
+  .hm-avatar { width: 48px; height: 48px; }
+  .hm-hero-sub { font-size: clamp(16px, 1.8vw, 24px); }
+  .hm-hero-title { font-size: clamp(24px, 4.8vw, 48px); }
+  .hm-input-wrap { height: 52px; }
+  .hm-send { width: 46px; height: 46px; }
+  .hm-cards-3 { gap: 12px; }
+  .hm-card { height: 84px; }
+  .hm-card .hm-card-icon { width: 48px; height: 48px; }
+  .hm-card .hm-svg { width: 28px; height: 28px; }
+}
+
+/* Pantallas muy bajas (por ejemplo con teclado flotante o barra grande) */
+@media (max-height: 620px) {
+  .hm-header { padding: 10px 14px; }
+  .hm-slogan { font-size: 0.85rem; }
+  .hm-logo-img { height: 18px; }
+  .hm-main { padding: 6px 10px 8px; gap: 10px; }
+  .hm-hero-sub { font-size: clamp(15px, 1.6vw, 22px); }
+  .hm-hero-title { font-size: clamp(20px, 4.2vw, 40px); margin: 2px 0 8px; }
+  .hm-input-wrap { height: 48px; }
+  .hm-send { width: 42px; height: 42px; }
+  .hm-cards-3 { max-width: 960px; gap: 10px; }
+  .hm-card { height: 78px; padding: 10px 12px; }
+  .hm-footer { padding: 8px 12px; }
+}
+
+/* Ultra-compacto (casos límite) */
+@media (max-height: 560px) {
+  .hm-header { padding: 8px 10px; }
+  .hm-hero-title { font-size: clamp(18px, 4vw, 34px); }
+  .hm-input-wrap { height: 44px; }
+  .hm-send { width: 38px; height: 38px; }
+  .hm-card { height: 72px; }
+}
+
+/* Nota: se removió la “O” con fondo; cualquier estilo .hm-logo-o ya no se usa */
