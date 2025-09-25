@@ -35,32 +35,36 @@ export function useRutasClinicas() {
         const rutasApi = rcRes.status === "fulfilled" ? rcRes.value : [];
         const puestos  = psRes.status === "fulfilled" ? psRes.value : [];
 
-        // Rutas clíncias → tipo fijo "clinica"
+        // Rutas clínicas → tipo fijo "clinica"
         const normRutas = (Array.isArray(rutasApi) ? rutasApi : [])
-          .filter(r => r?.latitud != null && r?.longitud != null)
+          .filter(r => r?.lat != null && r?.lng != null)
           .map(r => ({
             id: `rc_${r.id}`,
-            nombre: r.nombre ?? r.puntoEncuentro ?? "Ruta clínica",
+            nombre: r.nombre ?? r.punto_encuentro ?? "Ruta clínica",
             descripcion: r.descripcion ?? null,
-            latitud: Number(r.latitud),
-            longitud: Number(r.longitud),
+            latitud: Number(r.lat),
+            longitud: Number(r.lng),
             tipo: "clinica",
             fuente: "rutas_clinicas",
-            municipio_id: r.municipio_id ?? r.municipioId ?? null, // <-- AÑADE ESTO
+            municipio_id: r.municipio_id ?? r.municipioId ?? null,
+            telefono: r.telefono ?? r.clinica_telefono ?? null, // <-- Añadido
+            horario: r.horario ?? (r.hora_inicio && r.hora_fin ? `${r.hora_inicio} - ${r.hora_fin}` : null), // <-- Añadido
           }));
 
         // Puestos salud → tipo normalizado (centro/hospital/puesto)
         const normPuestos = (Array.isArray(puestos) ? puestos : [])
-          .filter(p => p?.latitud != null && p?.longitud != null)
+          .filter(p => p?.lat != null && p?.lng != null)
           .map(p => ({
             id: `ps_${p.id}`,
             nombre: p.nombre,
-            descripcion: p.direccion ?? p.telefono ?? null,
-            latitud: Number(p.latitud),
-            longitud: Number(p.longitud),
+            descripcion: p.direccion ?? null,
+            latitud: Number(p.lat),
+            longitud: Number(p.lng),
             tipo: normalizeTipo(p.tipo), // "centro", "hospital", "puesto", etc.
             fuente: "puestos_salud",
-            municipio_id: p.municipio_id ?? p.municipioId ?? null, // <-- AÑADE ESTO
+            municipio_id: p.municipio_id ?? p.municipioId ?? null,
+            telefono: p.telefono ?? null, // <-- Añadido
+            horario: p.horario ?? null,   // <-- Añadido
           }));
 
         // Mezcla + desduplicación

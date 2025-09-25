@@ -1,13 +1,16 @@
 const CACHE_NAME = "novamed-cache-v1";
-const API_URL = "/api/rutas"; // endpoint de tu backend
+const API_URL = "/api/rutas"; // endpoint de tu backend para rutas
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/"; // patrón para tiles
 
-// 🔵 AÑADIDO: otros endpoints que vas a usar y quieres cachear (SWR)
+// 🔵 ENDPOINTS que se quieren cachear mediante SWR, incluyendo los nuevos:
+// puestos-salud, departamentos, municipios, clinicas, jornadas y servicios
 const API_URLS = [
   "/api/puestos-salud",
   "/api/departamentos",
   "/api/municipios",
   "/api/clinicas",
+  "/api/jornadas",
+  "/api/servicios",
 ];
 
 // Archivos estáticos (puedes agregar más si los necesitas)
@@ -68,7 +71,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 🔵 AÑADIDO: SWR también para los otros endpoints API
+  // 2) SWR para los endpoints definidos en API_URLS (incluye los nuevos: jornadas y servicios)
   if (API_URLS.some((u) => request.url.includes(u))) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
@@ -83,16 +86,20 @@ self.addEventListener("fetch", (event) => {
           })
           .catch(() => null);
 
-        return cachedResponse || networkFetch || new Response("[]", {
-          status: 503,
-          headers: { "Content-Type": "application/json" },
-        });
+        return (
+          cachedResponse ||
+          networkFetch ||
+          new Response("[]", {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
+          })
+        );
       })
     );
     return;
   }
 
-  // 2) Cache First para tiles de OpenStreetMap
+  // 3) Cache First para tiles de OpenStreetMap
   if (request.url.includes("tile.openstreetmap.org")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
@@ -116,7 +123,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3) Otros recursos → Cache First con fallback
+  // 4) Otros recursos → Cache First con fallback
   event.respondWith(
     caches.match(request).then((cached) => cached || fetch(request))
   );

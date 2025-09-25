@@ -6,6 +6,19 @@
   --green: #22a45d;
   --white: #ffffff;
   --muted: #dbe8ff;
+
+  /* Auth */
+  --auth-glass: #2CA063;   /* overlay tint */
+  --auth-target: #2B5EAF;  /* tarjeta de formulario */
+  --auth-text: #ffffff;
+  --auth-shadow: rgba(0,0,0,.35);
+
+  /* Chat suaves */
+  --chat-assistant-bg: #eaf7f0; /* suave verdoso */
+  --chat-user-bg: #ffffff;      /* blanco */
+  --chat-text: #16324a;
+  --chat-shell-bg: color-mix(in oklab, var(--blue) 10%, #ffffff 90%);
+  --chat-shell-bd: rgba(255,255,255,.45);
 }
 
 /* Para una sola pantalla sin scroll */
@@ -41,31 +54,29 @@ body { margin: 0; overflow: hidden; }
 }
 
 .hm-logo { 
-  display:flex; 
-  align-items:center; 
-  gap:10px; 
-  font-weight:700; 
-  color: #fff; 
-  font-size: 28px; 
+  display: flex;
+  align-items: center;
+  gap: 0; /* Sin gap, para que la imagen no agregue espacio extra */
+  font-weight: 900;
+  color: #fff;
+  font-size: 45px;
+  line-height: 1;
 }
 .hm-logo-n { letter-spacing:1px; }
 
 /* Logo sin fondo, un poco más bajo que el texto */
 .hm-logo-img { 
-  height: 24px;             /* ligeramente menor que la altura del texto */
+  height: 1em !important;
   width: auto;
   display: inline-block;
-  object-fit: contain;
+  vertical-align: middle;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.hm-logo-rest { margin-left: 0px; font-size: 28px; }
+.hm-logo-rest { margin-left: 0px; font-size: 45px; }
 
-.hm-slogan { color: rgba(255,255,255,0.85); font-weight: 300; font-size: 0.95rem; margin-top: 2px; }
-
-/* avatar top right */
-.hm-header-right { display:flex; align-items:center; gap:12px; }
-.hm-avatar-wrap { width:72px; height:72px; border-radius:50%; border:4px solid rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 14px rgba(0,0,0,0.12); background: rgba(255,255,255,0.04); }
-.hm-avatar { width:64px; height:64px; border-radius:50%; object-fit:cover; }
+.hm-slogan { color: rgba(255,255,255,0.85); font-weight: 400; font-size: 1.1rem !important; margin-top: 2px; }
 
 /* MAIN */
 .hm-main { 
@@ -78,11 +89,32 @@ body { margin: 0; overflow: hidden; }
   gap: 16px; 
 }
 
+/* Ambiente de chat: títulos más compactos y subidos para dejar aire */
+.hm-main.is-chat { 
+  justify-content: flex-start; 
+  padding-top: 2px; 
+  overflow: hidden; /* Evita que el contenido principal se desborde */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.hm-main.is-chat .hm-chat-shell {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* Se asegura que ocupe gran parte del espacio vertical */
+  max-height: calc(100vh - 120px);
+  margin: 0 auto;
+}
+.hm-main.is-chat .hm-hero-sub { font-size: clamp(15px, 1.7vw, 21px); }
+.hm-main.is-chat .hm-hero-title { font-size: clamp(20px, 4.4vw, 38px); margin: 2px 0 4px; }
+
 .hm-hero { text-align:center; max-width: 1100px; width:100%; padding: 0 12px; }
 .hm-hero-sub { font-size: clamp(18px, 2vw, 28px); margin: 0; font-weight: 600; text-shadow: 0 6px 12px rgba(0,0,0,0.15); }
 .hm-hero-title { font-size: clamp(30px, 5.4vw, 64px); margin: 6px 0 14px; font-weight: 700; text-shadow: 0 10px 18px rgba(0,0,0,0.2); letter-spacing: -0.03em; }
 
-/* Input pill */
+/* Input pill (reutilizable arriba y abajo) */
 .hm-input-wrap {
   display:flex;
   align-items:center;
@@ -95,6 +127,7 @@ body { margin: 0; overflow: hidden; }
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   padding: 0 6px;
   position: relative;
+  overflow: hidden; /* asegura que nada se “salga” en móvil */
 }
 
 .hm-input {
@@ -107,9 +140,10 @@ body { margin: 0; overflow: hidden; }
   color: #16324a;
   border-radius: 999px;
   font-weight: 400;
+  min-width: 0;  /* 🔧 evita overflow en flex (móvil) */
 }
 
-/* Botón de enviar un poco más pequeño que antes */
+/* Botón de enviar */
 .hm-send {
   width:56px;
   height:56px;
@@ -123,11 +157,11 @@ body { margin: 0; overflow: hidden; }
   color: var(--white);
   cursor:pointer;
   box-shadow: 0 8px 18px rgba(0,0,0,0.22);
-  transition: transform .16s ease, box-shadow .16s ease, background .12s ease;
+  transition: transform .16s ease, box-shadow .16s ease, background .12s ease, opacity .12s ease;
+  flex: 0 0 auto; /* 🔧 no se encoge */
 }
-
+.hm-send[disabled] { opacity: .6; cursor: not-allowed; }
 .hm-send:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,0.28); background: #123a74; }
-
 .hm-send-icon { width:22px; height:22px; }
 
 /* sintomas links */
@@ -145,9 +179,7 @@ body { margin: 0; overflow: hidden; }
 .hm-sintoma-link:hover { color: #fff; transform: translateY(-2px); }
 
 /* CARDS / TRES BOTONES EQUILIBRADOS EN UNA SOLA FILA */
-.hm-cards {
-  width: 100%;
-}
+.hm-cards { width: 100%; }
 
 .hm-cards-3 {
   margin-top: 22px;
@@ -175,6 +207,7 @@ body { margin: 0; overflow: hidden; }
   color: var(--blue);
   font-weight: 700;
   text-align:left;
+  overflow: hidden;
 }
 
 .hm-card .hm-card-icon {
@@ -191,10 +224,8 @@ body { margin: 0; overflow: hidden; }
 }
 
 .hm-card .hm-svg { width:34px; height:34px; display:block; }
-
 .hm-card-text { font-size: 1.05rem; }
 
-/* variantes */
 .hm-card-green { background: linear-gradient(180deg, var(--green), #1f8a4a); color: #fff; }
 .hm-card-green .hm-card-icon { background: rgba(255,255,255,0.08); }
 .hm-card-white { background: var(--white); color: var(--blue); }
@@ -202,6 +233,90 @@ body { margin: 0; overflow: hidden; }
 
 /* Hover effects */
 .hm-card:hover { transform: translateY(-8px); box-shadow: 0 20px 38px rgba(0,0,0,0.28); }
+
+/* ====== CHAT SHELL ====== */
+.hm-chat-shell{
+  width: min(900px, 92%);
+  max-width: 900px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 6px auto 6px;
+  padding: 8px 8px 10px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--chat-shell-bg), color-mix(in oklab, var(--chat-shell) 92%, #fff 8%));
+  box-shadow: 0 10px 30px rgba(0,0,0,.22);
+  border: 1px solid var(--chat-shell-bd);
+  backdrop-filter: blur(2px) saturate(105%);
+  -webkit-backdrop-filter: blur(2px) saturate(105%);
+  min-height: 0; /* Permite que el contenedor se encoja si es necesario */
+}
+
+.hm-chat{
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 auto;
+  padding: 6px 8px 6px;
+  overflow-y: hidden;     /* Oculta el scroll por defecto */
+  overscroll-behavior: contain;
+}
+
+.hm-chat:hover {
+    overflow-y: auto;       /* Muestra el scroll al pasar el cursor */
+}
+
+.hm-bubble{
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  font-size: .95rem;
+  line-height: 1.35;
+  color: var(--chat-text);
+  border: 1px solid rgba(0,0,0,.06);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+.hm-bubble.is-user{ align-self: flex-end; background: var(--chat-user-bg); }
+.hm-bubble.is-assistant{ align-self: flex-start; background: var(--chat-assistant-bg); }
+
+/* Botón de cierre en el chat modificado para ser pequeño y estar en la esquina superior derecha */
+.hm-chat-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 28px;                /* Tamaño aumentado */
+    height: 28px;
+    background: rgba(255, 255, 255, 0.25);  /* Fondo circular semitransparente */
+    border: none;
+    border-radius: 50%;
+    color: var(--blue-dark);
+    font-size: 16px;            /* Letra un poco más grande */
+    line-height: 28px;          /* Centrado vertical */
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.hm-chat-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Barra inferior del chat (cerca del footer) */
+.hm-chat-dock{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 0;
+  padding-bottom: 2px; /* deja un pequeño respiro sobre el footer */
+  flex-shrink: 0; /* Evita que la barra de entrada se encoja */
+}
 
 /* FOOTER */
 .hm-footer {
@@ -219,42 +334,263 @@ body { margin: 0; overflow: hidden; }
 .hm-footer-pin { width:22px; height:22px; }
 .hm-location { font-weight:600; }
 
-.hm-user-circle { width:44px; height:44px; border-radius:50%; background: var(--blue); display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
+/* Botón de usuario (footer) */
+.hm-user-circle { 
+  width:44px; height:44px; 
+  border-radius:50%; 
+  background: var(--blue); 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  color:#fff; 
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+  outline: none;
+  cursor: pointer;
+}
+.hm-user-circle:focus-visible { box-shadow: 0 0 0 3px rgba(43,94,175,.45); }
 
-/* RESPONSIVE — asegurando una sola pantalla sin scroll */
+/* ====== AUTH MODAL (GLASS) ====== */
+.hm-auth-overlay{
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklab, var(--auth-glass) 28%, rgba(0,0,0,0.55));
+  backdrop-filter: blur(10px) saturate(110%);
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.hm-auth-card{
+  position: relative;
+  width: min(560px, 92vw);
+  border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--auth-target) 90%, #000 0%), color-mix(in oklab, var(--auth-target) 80%, #000 0%));
+  color: var(--auth-text);
+  box-shadow: 0 20px 60px var(--auth-shadow);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 20px 18px 22px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* halo animado alrededor del target */
+.hm-auth-card::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: 20px;
+  background:
+    conic-gradient(from 0deg, #fff 0deg, rgba(255,255,255,.2) 120deg, rgba(255,255,255,0) 240deg, rgba(255,255,255,.2) 320deg, #fff 360deg);
+  filter: blur(16px);
+  animation: hmGlow 6s linear infinite;
+  z-index: -1;
+  opacity: .35;
+}
+@keyframes hmGlow{ to{ transform: rotate(360deg); } }
+
+/* Cerrar */
+.hm-auth-close{
+  position:absolute;
+  top:10px; right:12px;
+  width:36px; height:36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  font-size: 22px;
+  line-height: 1;
+  display:flex; align-items:center; justify-content:center;
+  cursor: pointer;
+  transition: background .2s ease, transform .12s ease;
+}
+.hm-auth-close:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+
+/* Marca en el target: N [img] vaMed (O como imagen) */
+.hm-auth-brand{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  font-weight:800; letter-spacing:.2px; margin: 4px auto 14px;
+  user-select:none;
+}
+.hm-auth-n, .hm-auth-rest{ font-size: clamp(22px, 5.2vw, 32px); }
+.hm-auth-o{
+  height: clamp(22px, 5.2vw, 32px);
+  width: auto;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+}
+
+/* Tabs */
+.hm-auth-tabs{
+  display:flex; gap:8px; justify-content:center; margin-bottom:12px;
+}
+.hm-auth-tab{
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .12s ease, background .2s ease, border-color .2s ease;
+}
+.hm-auth-tab:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); }
+.hm-auth-tab.is-active{ background: #fff; color: var(--auth-target); border-color: transparent; }
+
+/* Métodos */
+.hm-auth-methods{
+  display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom: 12px;
+}
+.hm-auth-method{
+  display:flex; align-items:center; gap:8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  cursor: pointer;
+  transition: transform .12s ease, background .2s ease, border-color .2s ease;
+}
+.hm-auth-method:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); }
+.hm-auth-method.is-selected{ background:#fff; color: var(--auth-target); border-color: transparent; }
+.hm-auth-icon{ width:20px; height:20px; display:block; }
+
+/* Formulario */
+.hm-auth-form{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+  width: min(440px, 92%);
+  margin: 0 auto;
+}
+.hm-auth-label{ font-size:.92rem; opacity:.95; }
+.hm-auth-input{
+  width:100%;
+  height:48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08);
+  color:#fff;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color .18s ease, background .18s ease;
+}
+.hm-auth-input::placeholder{ color: rgba(255,255,255,.8); }
+.hm-auth-input:focus{ border-color:#fff; background: rgba(255,255,255,.14); }
+
+.hm-auth-google-hint{
+  text-align:center; opacity:.9; padding: 10px 6px 0;
+}
+
+.hm-auth-submit{
+  margin-top: 6px;
+  height: 50px;
+  border-radius: 12px;
+  border: none;
+  background: #ffffff;
+  color: var(--auth-target);
+  font-weight: 800;
+  letter-spacing:.3px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .18s ease, opacity .12s ease;
+}
+.hm-auth-submit:hover{ transform: translateY(-2px); box-shadow: 0 16px 34px rgba(0,0,0,.3); }
+.hm-auth-link{
+  background: transparent;
+  border: none;
+  color: #fff;
+  opacity: .9;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 0 0;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* ====== RESPONSIVE (Mantener escritorio intacto + mobile perfecto para PWA) ====== */
+@media (max-width: 900px) {
+  .hm-root, .hm-main, .hm-chat-shell {
+    min-height: 0 !important;
+    max-height: 100svh !important;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .hm-main {
+    overflow: auto !important;
+    max-height: 100svh !important;
+    padding-bottom: 80px !important; /* deja espacio para el footer fijo */
+  }
+  .hm-chat-shell {
+    max-height: 100svh !important;
+    overflow-y: auto !important;
+  }
+  .hm-footer {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 100;
+    border-radius: 0;
+    width: 100vw;
+    box-sizing: border-box;
+  }
+}
+
+/* Ajuste extra para pantallas muy bajas */
+@media (max-height: 600px) {
+  .hm-main {
+    padding-bottom: 90px !important;
+  }
+}
+
 @media (max-width: 900px) {
   .hm-header { padding: 16px; }
   .hm-avatar-wrap { width:56px; height:56px; }
-  .hm-logo-rest, .hm-logo-n { font-size:22px; }
-  .hm-logo-img { height: 20px; }
+  .hm-logo-rest, .hm-logo-n { font-size:26px; }
+  .hm-logo-img { height: 24px; }
   .hm-hero-title { font-size: clamp(24px, 6.2vw, 44px); }
   .hm-cards-3 { gap: 16px; max-width: 820px; }
   .hm-card { height: 92px; padding: 12px; }
   .hm-card .hm-card-icon { width:56px; height:56px; }
+
+  /* Auth card ajusta paddings */
+  .hm-auth-card{ padding: 18px 14px 20px; border-radius:16px; }
 }
 
 @media (max-width: 640px) {
   .hm-header { padding: 12px; }
   .hm-hero-title { font-size: clamp(22px, 7.2vw, 36px); }
-  .hm-input-wrap { height: 56px; }
+  .hm-input-wrap { height: 56px; width: min(820px, 92%); } /* 🔧 más ancho útil */
   .hm-send { width: 52px; height: 52px; }
-  /* Mantener 3 columnas pero compactas para evitar scroll */
+
+  /* 🔧 Tarjetas: 2 columnas para verse completas */
   .hm-cards-3 { 
     gap: 12px; 
     max-width: 100%;
-    padding: 0 4px;
+    padding: 0 8px;
+    grid-template-columns: repeat(2, 1fr);
   }
   .hm-card { 
-    height: 84px; 
-    padding: 10px; 
+    height: 92px; 
+    padding: 10px 12px; 
+    gap: 8px;
   }
-  .hm-card .hm-card-icon { width:48px; height:48px; }
-  .hm-card .hm-svg { width:28px; height:28px; }
-  .hm-card-text { font-size: 0.95rem; }
+  .hm-card .hm-card-icon { width:48px; height:48px; margin-right: 6px; }
+  .hm-card .hm-svg { width:24px; height:24px; }
+  .hm-card-text { font-size: 0.95rem; line-height: 1.2; }
+
   .hm-footer { padding: 8px 14px; font-size: 0.9rem; }
+  
+  /* Chat shell más compacto en móvil */
+  .hm-chat-shell{ width: min(900px, 94%); margin: 4px auto 4px; }
 }
 
-/* Pantallas algo bajas */
+@media (max-width: 420px) {
+  /* 🔧 Una sola columna para tarjetas en teléfonos pequeños */
+  .hm-cards-3 { grid-template-columns: 1fr; }
+}
+
 @media (max-height: 800px) {
   .hm-header { padding: 14px 20px; }
   .hm-hero-title { margin: 4px 0 10px; }
@@ -264,9 +600,11 @@ body { margin: 0; overflow: hidden; }
   .hm-cards-3 { margin-top: 16px; gap: 16px; }
   .hm-card { height: 90px; padding: 12px 14px; }
   .hm-footer { padding: 10px 18px; }
+
+  /* Auth: reduce sombras y bordes para pantallas bajas */
+  .hm-auth-card{ box-shadow: 0 12px 32px rgba(0,0,0,.3); }
 }
 
-/* Pantallas bajas */
 @media (max-height: 700px) {
   .hm-avatar-wrap { width: 56px; height: 56px; }
   .hm-avatar { width: 48px; height: 48px; }
@@ -278,9 +616,11 @@ body { margin: 0; overflow: hidden; }
   .hm-card { height: 84px; }
   .hm-card .hm-card-icon { width: 48px; height: 48px; }
   .hm-card .hm-svg { width: 28px; height: 28px; }
+
+  /* Auth: compactación vertical */
+  .hm-auth-card{ padding: 16px 12px 18px; }
 }
 
-/* Pantallas muy bajas (por ejemplo con teclado flotante o barra grande) */
 @media (max-height: 620px) {
   .hm-header { padding: 10px 14px; }
   .hm-slogan { font-size: 0.85rem; }
@@ -293,15 +633,48 @@ body { margin: 0; overflow: hidden; }
   .hm-cards-3 { max-width: 960px; gap: 10px; }
   .hm-card { height: 78px; padding: 10px 12px; }
   .hm-footer { padding: 8px 12px; }
+
+  /* Auth */
+  .hm-auth-card{ border-radius:14px; }
 }
 
-/* Ultra-compacto (casos límite) */
 @media (max-height: 560px) {
   .hm-header { padding: 8px 10px; }
   .hm-hero-title { font-size: clamp(18px, 4vw, 34px); }
   .hm-input-wrap { height: 44px; }
   .hm-send { width: 38px; height: 38px; }
   .hm-card { height: 72px; }
+
+  /* Auth ultra-compacto */
+  .hm-auth-card{ padding: 12px 10px 14px; }
+}
+
+/* --- SOLO PARA ESCRITORIO: barra de escribir más baja en modo chat --- */
+@media (min-width: 901px) {
+  .hm-main.is-chat {
+    justify-content: flex-end !important;
+    padding-bottom: 20px !important; /* acerca la barra de escribir a la barra blanca */
+  }
+  .hm-main.is-chat .hm-chat-shell {
+    max-height: calc(100vh - 210px) !important; /* da más espacio al chat */
+  }
+}
+
+/* Mantener 4 columnas en escritorio, 2 en tablet, 1 en móvil */
+@media (min-width: 901px) {
+  .hm-cards-3 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+@media (max-width: 900px) and (min-width: 641px) {
+  .hm-cards-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 640px) {
+  .hm-cards-3 {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Nota: se removió la “O” con fondo; cualquier estilo .hm-logo-o ya no se usa */

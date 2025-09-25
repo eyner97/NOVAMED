@@ -260,11 +260,11 @@ body { margin: 0; overflow: hidden; }
   flex-direction: column;
 
   /* Espacio extra al fondo */
-  margin-bottom: 5px;   /* 👈 ahora siempre queda separado del borde */
-  padding-bottom: 16px;
+  margin-bottom: 5px;
+  padding-bottom: 32px;   /* <--- Aumenta este valor para más espacio inferior */
 
   /* Altura disponible sin recortarse demasiado */
-  max-height: calc(110dvh - 240px);
+  max-height: calc(110dvh - 200px);
   overflow-y: auto;
 
   scroll-behavior: smooth;

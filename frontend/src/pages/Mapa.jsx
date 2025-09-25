@@ -6,35 +6,37 @@ import L from "leaflet";
 import { useRutasClinicas } from "../hooks/useRutasClinicas";
 import { getDepartamentos, getMunicipios } from "../services/api";
 import "../styles/Mapa.css";
+import { useLocation } from "react-router-dom";
 
 const { BaseLayer } = LayersControl;
 
 // 🟢 ÍCONOS ESPECÍFICOS POR TIPO (para los marcadores del mapa)
 const iconClinica = L.icon({
   iconUrl: "/icons/icon_clinic.png",
-  iconSize: [45, 45],
+  iconSize: [35, 35],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
 });
 
 const iconCentro = L.icon({
   iconUrl: "/icons/icon_centro_salud.png",
-  iconSize: [32, 32],
+  iconSize: [35, 35],
   iconAnchor: [16, 32],
   popupAnchor: [0, -28],
 });
 
 const iconHospital = L.icon({
   iconUrl: "/icons/icon_hospital.png",
-  iconSize: [45, 45],
+  iconSize: [35, 35],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
 });
 
 const iconUser = L.icon({
-  iconUrl: "/icons/user-pin-white.png",
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
+  iconUrl: "/icons/icon_ubication_user.png",
+  iconSize: [35, 35],
+  iconAnchor: [22.5, 45], // <-- Ancla el icono en la punta inferior central
+  popupAnchor: [0, -45],
 });
 
 // 🔹 Helper: devuelve el ícono según el tipo ya normalizado en tu hook
@@ -45,31 +47,62 @@ function getIcon(tipo) {
   return iconCentro; // fallback
 }
 
-// 🔹 SVGs compactos para paneles (contraste por currentColor)
+// 🔹 SVGs realistas para paneles (contraste por currentColor)
 function SvgForTipo({ tipo }) {
   if (tipo === "clinica") {
-    // Camioncito (clínica móvil)
+    // Camión con cruz (clínica móvil)
     return (
-      <svg viewBox="0 0 24 24" className="mini" aria-hidden="true">
-        <path d="M3 6h11v8H3zM14 9h3l3 3v2h-6V9z" fill="currentColor"/>
-        <circle cx="7" cy="16" r="2" fill="currentColor"/>
-        <circle cx="16" cy="16" r="2" fill="currentColor"/>
-        <path d="M7 10h2v-2h2v2h2v2h-2v2h-2v-2H7z" fill="#fff"/>
+      <svg viewBox="0 0 64 40" width={36} height={28} className="mini" aria-hidden="true">
+        {/* Camión */}
+        <rect x="2" y="14" width="34" height="16" rx="3" fill="currentColor" />
+        <rect x="36" y="20" width="18" height="10" rx="2" fill="#b3c6e6" stroke="currentColor" strokeWidth="2"/>
+        {/* Ventana */}
+        <rect x="40" y="23" width="7" height="5" rx="1" fill="#fff" opacity="0.8"/>
+        {/* Ruedas */}
+        <circle cx="12" cy="34" r="4" fill="#222" stroke="#888" strokeWidth="1.5"/>
+        <circle cx="44" cy="34" r="4" fill="#222" stroke="#888" strokeWidth="1.5"/>
+        {/* Cruz roja */}
+        <g>
+          <rect x="16" y="20" width="8" height="8" rx="2" fill="#fff"/>
+          <rect x="19" y="22" width="2" height="4" fill="#e53935"/>
+          <rect x="17" y="24" width="6" height="2" fill="#e53935"/>
+        </g>
       </svg>
     );
   }
   if (tipo === "hospital") {
-    // Cruz (hospital)
+    // Edificio hospital realista con cruz
     return (
-      <svg viewBox="0 0 24 24" className="mini" aria-hidden="true">
-        <path d="M10 3h4v6h6v4h-6v6h-4v-6H4V9h6z" fill="currentColor"/>
+      <svg viewBox="0 0 48 48" width={32} height={32} className="mini" aria-hidden="true">
+        {/* Edificio */}
+        <rect x="6" y="18" width="36" height="22" rx="3" fill="currentColor" />
+        {/* Puerta */}
+        <rect x="20" y="30" width="8" height="10" rx="1.5" fill="#fff" />
+        {/* Ventanas */}
+        <rect x="10" y="22" width="6" height="4" rx="1" fill="#b3c6e6" />
+        <rect x="32" y="22" width="6" height="4" rx="1" fill="#b3c6e6" />
+        {/* Cruz roja */}
+        <g>
+          <rect x="21" y="20" width="6" height="6" rx="1.5" fill="#fff"/>
+          <rect x="23" y="22" width="2" height="4" fill="#e53935"/>
+          <rect x="21" y="24" width="6" height="2" fill="#e53935"/>
+        </g>
       </svg>
     );
   }
-  // Edificio (centro de salud u otros)
+  // Centro de salud: casa con cruz
   return (
-    <svg viewBox="0 0 24 24" className="mini" aria-hidden="true">
-      <path d="M3 10h18v2H3v-2zm2-6h14v4H5V4zm0 10h14v6H5v-6z" fill="currentColor"/>
+    <svg viewBox="0 0 48 48" width={32} height={32} className="mini" aria-hidden="true">
+      {/* Casa */}
+      <polygon points="24,8 6,22 10,22 10,38 38,38 38,22 42,22" fill="currentColor" />
+      <rect x="18" y="28" width="12" height="10" rx="2" fill="#fff" />
+      {/* Cruz roja */}
+      <g>
+        <rect x="22" y="30" width="4" height="8" rx="1" fill="#e53935"/>
+        <rect x="20" y="32" width="8" height="4" rx="1" fill="#e53935"/>
+      </g>
+      {/* Techo */}
+      <polygon points="24,8 6,22 42,22" fill="#b3c6e6" opacity="0.5"/>
     </svg>
   );
 }
@@ -87,6 +120,16 @@ function FlyToUser({ userPos }) {
       map.flyTo(userPos, 15, { duration: 0.8 });
     }
   }, [userPos, map]);
+  return null;
+}
+
+function FlyToSearchResult({ coords }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) {
+      map.flyTo(coords, 15, { duration: 0.8 });
+    }
+  }, [coords, map]);
   return null;
 }
 
@@ -108,10 +151,10 @@ function FitBoundsToCiudad({ ciudad, rutas }) {
 }
 
 export default function Mapa() {
-  const rutas = useRutasClinicas(); // consume API/backend
+  const rutas = useRutasClinicas();
   const [selected, setSelected] = useState(null);
   const [userPos, setUserPos] = useState(null);
-  const [routeCoords, setRouteCoords] = useState([]); // [[lat,lng], ...] de OSRM
+  const [routeCoords, setRouteCoords] = useState([]);
   const [routeKm, setRouteKm] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -137,6 +180,23 @@ export default function Mapa() {
 
   // --- toggle ubicación + notificación ---
   const [locEnabled, setLocEnabled] = useState(false);
+
+  // Detectar ubicación automáticamente al cargar si está disponible
+  useEffect(() => {
+    if (!("geolocation" in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = [pos.coords.latitude, pos.coords.longitude];
+        setUserPos(loc);
+        setLocEnabled(true);
+        // No mostrar toast aquí para evitar flashes
+      },
+      () => {
+        setLocEnabled(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 7000 }
+    );
+  }, []);
 
   const requestLocation = async () => {
     if (!("geolocation" in navigator)) {
@@ -333,21 +393,50 @@ export default function Mapa() {
       setToast("Escribe un nombre para buscar.");
       return;
     }
-    // busca en todas las rutas, no solo en los filtrados por tipo/ciudad
-    const allMatches = rutas.filter(r => r.nombre?.toLowerCase().includes(key));
-    const item = allMatches[0] || filtrados[0];
-    if (item && mapRef.current) {
-      const center = [Number(item.latitud), Number(item.longitud)];
-      mapRef.current.flyTo(center, 15, { duration: 0.6 });
-      setSelected(item);
+
+    let bestMatch = null;
+    let highestSimilarity = 0;
+
+    rutas.forEach((r) => {
+      const nombre = r.nombre.toLowerCase();
+      const similarity = nombre.includes(key) ? 1 : 0;
+      if (similarity > highestSimilarity) {
+        highestSimilarity = similarity;
+        bestMatch = r;
+      }
+    });
+
+    if (bestMatch) {
+      const center = [Number(bestMatch.latitud), Number(bestMatch.longitud)];
+      setSelected(bestMatch);
       setFocusCenter(center);
+      setSearchResultCoords(center); // <-- aquí
+      setToast(`Mostrando resultados para: ${bestMatch.nombre}`);
     } else {
       setToast("Sin resultados para la búsqueda.");
     }
   };
   const onSearchKey = (e) => {
-    if (e.key === "Enter") onBuscarClick();
+    if (e.key === "Enter") {
+        e.preventDefault();  // evita el comportamiento por defecto
+        onBuscarClick();
+    }
   };
+
+  const [searchResultCoords, setSearchResultCoords] = useState(null);
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const lat = params.get("lat");
+    const lng = params.get("lng");
+    const nombre = params.get("nombre");
+    if (lat && lng) {
+      const coords = [parseFloat(lat), parseFloat(lng)];
+      setFocusCenter(coords);
+      setSearchResultCoords(coords);
+      // Opcional: puedes buscar el marker por nombre y seleccionarlo
+    }
+  }, [location.search]);
 
   return (
     <div className="mapa-page">
@@ -387,9 +476,9 @@ export default function Mapa() {
 
           {/* Ubicación + lupa (abre modal glass) */}
           <button className="icon-btn" onClick={() => setShowGeoModal(true)} aria-label="Buscar por departamento y ciudad">
-            <svg viewBox="0 0 24 24" className="icon white">
-              <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/>
-              <path d="M15.5 14h-.8l-.3-.3a6 6 0 10-1.6 1.6l.3.3v.8l4.3 4.3 1.5-1.5-4.3-4.3z" fill="currentColor" opacity="0.9"/>
+            <svg viewBox="0 0 24 24" className="icon white" aria-hidden="true">
+              <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
+              <circle cx="12" cy="9.5" r="1.3" fill="#fff"/>
             </svg>
           </button>
 
@@ -414,18 +503,26 @@ export default function Mapa() {
         {/* Panel izquierdo: ahora con scroll oculto hasta hover */}
         <aside className="sidebar-left scrollable hide-scroll-until-hover">
           <h3>Unidad más cercana</h3>
-          {leftList.map((u) => (
+          {(userPos
+            ? filtrados.filter(u =>
+                haversineKm(userPos[0], userPos[1], Number(u.latitud), Number(u.longitud)) <= 100
+              )
+            : leftList
+          ).map((u) => (
             <div key={u.id} className="unidad-card">
               <div className="unidad-title">
-                {/* SVG dinámico por tipo (contrasta con el fondo) */}
                 <SvgForTipo tipo={u.tipo} />
                 <h4>{u.nombre}</h4>
               </div>
               <p className="unidad-dist">
-                {focusCenter
-                  ? `${Math.max(0.1, Math.hypot(u.latitud - focusCenter[0], u.longitud - focusCenter[1]).toFixed(2))}°`
-                  : `${Math.floor(Math.random() * 4) + 1} km`}
-              </p>
+                {userPos
+                  ? `${haversineKm(userPos[0], userPos[1], Number(u.latitud), Number(u.longitud)).toFixed(2)} km`
+                  : (
+                    focusCenter
+                      ? `${Math.max(0.1, Math.hypot(u.latitud - focusCenter[0], u.longitud - focusCenter[1]).toFixed(2))}°`
+                      : `${Math.floor(Math.random() * 4) + 1} km`
+                    )
+              }</p>
               <button className="ruta-btn" onClick={() => calcularRuta(u)}>Ver ruta</button>
             </div>
           ))}
@@ -440,8 +537,8 @@ export default function Mapa() {
             whenCreated={whenCreated}
           >
             {userPos && <FlyToUser userPos={userPos} />}
-            {/* Solo hace zoom si hay ciudadFiltrada */}
             {ciudadFiltrada && <FitBoundsToCiudad ciudad={ciudadFiltrada} rutas={rutas} />}
+            {searchResultCoords && <FlyToSearchResult coords={searchResultCoords} />}
             <LayersControl position="topright">
               <BaseLayer checked name="Mapa base">
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -450,6 +547,12 @@ export default function Mapa() {
                 <TileLayer
                   url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
                   attribution="&copy; OpenTopoMap"
+                />
+              </BaseLayer>
+              <BaseLayer name="Calles y locales (CartoDB)">
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               </BaseLayer>
             </LayersControl>
@@ -466,7 +569,12 @@ export default function Mapa() {
             ))}
 
             {userPos && (
-              <Marker position={userPos} icon={iconUser}>
+              <Marker
+                position={userPos}
+                icon={iconUser}
+                interactive={true}
+                zIndexOffset={1000} // Opcional: siempre arriba
+              >
                 <Popup>Tu ubicación</Popup>
               </Marker>
             )}
@@ -490,9 +598,13 @@ export default function Mapa() {
                 </div>
                 <h3>{selected.nombre}</h3>
                 <p>{selected.descripcion}</p>
-                <p>📍 {selected.latitud}, {selected.longitud}</p>
-                <p>📞 012 345 678</p>
-                <p>🕑 24/7</p>
+                {/* Elimina latitud y longitud */}
+                {selected.telefono && (
+                  <p>📞 {selected.telefono}</p>
+                )}
+                {selected.horario && (
+                  <p>🕑 {selected.horario}</p>
+                )}
                 <button className="ruta-btn big" onClick={() => calcularRuta(selected)}>
                   Cómo llegar
                 </button>

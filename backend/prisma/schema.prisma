@@ -1,3 +1,7 @@
+// =======================
+// Prisma Schema
+// =======================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,78 +11,290 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo maestro de Departamentos
-model Departamento {
-  id         String     @id
+// public.articulos_salud
+model articulos_salud {
+  id           String   @id @default(uuid())
+  titulo       String
+  contenido    String
+  tema         String?     // USER-DEFINED en PG
+  etiquetas    String?     // text[] en PG (guárdalo como JSON/string)
+  fuente_url   String?
+  aprobado     Boolean     @default(true)
+  publicado_at DateTime?
+  created_at   DateTime?
+
+  @@map("articulos_salud")
+}
+
+// public.chat_sessions
+model chat_sessions {
+  id               String   @id @default(uuid())
+  usuario_id       String?
+  departamento_id  String?
+  municipio_id     String?
+  canal            String?  @default("web")
+  created_at       DateTime?
+  updated_at       DateTime?
+
+  // Relaciones
+  usuario      usuarios?     @relation(fields: [usuario_id], references: [id])
+  departamento departamentos? @relation(fields: [departamento_id], references: [id])
+  municipio    municipios?    @relation(fields: [municipio_id], references: [id])
+  messages     chat_messages[]
+  preclasifs   preclasificaciones[]
+
+  @@map("chat_sessions")
+}
+
+// public.chat_messages
+model chat_messages {
+  id          String   @id @default(uuid())
+  session_id  String
+  role        String?     // USER-DEFINED en PG
+  content     String
+  created_at  DateTime?
+
+  // Relaciones
+  session chat_sessions @relation(fields: [session_id], references: [id])
+
+  @@map("chat_messages")
+}
+
+// public.clinicas_moviles
+model clinicas_moviles {
+  id         String   @id @default(uuid())
   nombre     String
-  codigo     String?
-  createdAt  DateTime?
-  municipios Municipio[]
-}
-
-// Municipios (FK a Departamento)
-model Municipio {
-  id              String     @id
-  departamentoId  String
-  nombre          String
-  codigo          String?
-  createdAt       DateTime?
-
-  departamento Departamento @relation(fields: [departamentoId], references: [id])
-  puestos      PuestoSalud[]
-  rutas        RutaClinica[]
-}
-
-// Clínicas móviles
-model ClinicaMovil {
-  id          String       @id
-  nombre      String
   descripcion String?
-  telefono    String?
-  activa      Boolean      @default(true)
-  createdAt   DateTime?
-  rutas       RutaClinica[]
+  telefono   String?
+  activa     Boolean  @default(true)
+  created_at DateTime?
+
+  // Relaciones
+  rutas rutas_clinicas[]
+
+  @@map("clinicas_moviles")
 }
 
-// Puestos de salud (FK a Municipio)
-model PuestoSalud {
-  id          String   @id
-  nombre      String
-  tipo        String?     // enum en Supabase, string aquí
-  direccion   String?
-  telefono    String?
-  municipioId String
-  latitud     Float?
-  longitud    Float?
+// public.departamentos
+model departamentos {
+  id         String   @id @default(uuid())
+  nombre     String   @unique
+  codigo     String?
+  created_at DateTime?
 
-  municipio Municipio @relation(fields: [municipioId], references: [id])
+  // Relaciones
+  municipios municipios[]
+  usuarios   usuarios[]
+  chats      chat_sessions[]
+
+  @@map("departamentos")
 }
 
-// Ruta de clínica (compatibilidad con tu API actual + campos que vienen de Supabase)
-model RutaClinica {
-  id             String   @id
+// public.municipios
+model municipios {
+  id               String   @id @default(uuid())
+  departamento_id  String
+  nombre           String
+  codigo           String
+  created_at       DateTime?
 
-  // FKs sincronizadas
-  clinicaId      String?
-  municipioId    String?
+  // Relaciones
+  departamento departamentos @relation(fields: [departamento_id], references: [id])
+  puestos      puestos_salud[]
+  rutas        rutas_clinicas[]
+  jornadas     jornadas_salud[]
+  usuarios     usuarios[]
+  chats        chat_sessions[]
 
-  // Datos de agenda
-  fecha          DateTime?
-  horaInicio     String?
-  horaFin        String?
-  puntoEncuentro String?
+  @@map("municipios")
+}
 
-  // Coordenadas (pueden venir de Supabase o usarse localmente)
-  latitud        Float?
-  longitud       Float?
+// public.enfermedades
+model enfermedades {
+  id            String   @id @default(uuid())
+  nombre        String   @unique
+  descripcion   String?
+  signos_alarma String?
+  nivel_riesgo  String?     // USER-DEFINED en PG
+  etiquetas     String?     // text[] en PG (JSON/string)
+  created_at    DateTime?
 
-  // Campos “legado” (los usaba tu API actual)
-  nombre         String?
-  descripcion    String?
+  // Relaciones
+  sintomas_rel enfermedad_sintoma[]
+  preclasifs   preclasificaciones[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@map("enfermedades")
+}
 
-  clinica    ClinicaMovil? @relation(fields: [clinicaId], references: [id])
-  municipio  Municipio?    @relation(fields: [municipioId], references: [id])
+// public.sintomas
+model sintomas {
+  id         String   @id @default(uuid())
+  nombre     String   @unique
+  created_at DateTime?
+
+  // Relaciones
+  enfermedades_rel enfermedad_sintoma[]
+
+  @@map("sintomas")
+}
+
+// public.enfermedad_sintoma (pivot)
+model enfermedad_sintoma {
+  enfermedad_id String
+  sintoma_id    String
+  peso          Int      @default(1)
+
+  // Relaciones
+  enfermedad enfermedades @relation(fields: [enfermedad_id], references: [id])
+  sintoma    sintomas     @relation(fields: [sintoma_id], references: [id])
+
+  @@id([sintoma_id, enfermedad_id])
+  @@map("enfermedad_sintoma")
+}
+
+// public.jornadas_salud
+model jornadas_salud {
+  id           String   @id @default(uuid())
+  titulo       String
+  descripcion  String?
+  tipo         String?     // USER-DEFINED en PG
+  fecha        DateTime
+  hora_inicio  String?     // time -> String
+  hora_fin     String?     // time -> String
+  municipio_id String
+  lugar        String?
+  lat          Float?
+  lng          Float?
+  geom         String?     // geography -> String
+  created_at   DateTime?
+
+  // Relaciones
+  municipio municipios @relation(fields: [municipio_id], references: [id])
+  servicios jornadas_servicios[]
+
+  @@map("jornadas_salud")
+}
+
+// public.servicios_salud
+model servicios_salud {
+  id          String   @id @default(uuid())
+  nombre      String   @unique
+  descripcion String?
+
+  // Relaciones
+  jornadas jornadas_servicios[]
+
+  @@map("servicios_salud")
+}
+
+// public.jornadas_servicios (pivot)
+model jornadas_servicios {
+  jornada_id  String
+  servicio_id String
+
+  // Relaciones
+  jornada  jornadas_salud  @relation(fields: [jornada_id], references: [id])
+  servicio servicios_salud @relation(fields: [servicio_id], references: [id])
+
+  @@id([jornada_id, servicio_id])
+  @@map("jornadas_servicios")
+}
+
+// public.puestos_salud
+model puestos_salud {
+  id           String   @id @default(uuid())
+  nombre       String
+  tipo         String      // USER-DEFINED en PG
+  direccion    String?
+  telefono     String?
+  municipio_id String
+  lat          Float?
+  lng          Float?
+  geom         String?     // geography -> String
+  created_at   DateTime?
+
+  // Relaciones
+  municipio municipios @relation(fields: [municipio_id], references: [id])
+
+  @@map("puestos_salud")
+}
+
+// public.rutas_clinicas
+model rutas_clinicas {
+  id            String   @id @default(uuid())
+  clinica_id    String
+  municipio_id  String
+  fecha         DateTime
+  hora_inicio   String     // time -> String
+  hora_fin      String     // time -> String
+  punto_encuentro String?
+  lat           Float?
+  lng           Float?
+  geom          String?    // geography -> String
+  estado        String     @default("programada") // USER-DEFINED en PG
+  created_at    DateTime?
+
+  // Relaciones
+  clinica   clinicas_moviles @relation(fields: [clinica_id], references: [id])
+  municipio municipios       @relation(fields: [municipio_id], references: [id])
+
+  @@map("rutas_clinicas")
+}
+
+// public.preclasificaciones
+model preclasificaciones {
+  id            String   @id @default(uuid())
+  session_id    String
+  enfermedad_id String?
+  riesgo        String?     // USER-DEFINED
+  confidence    Float?
+  created_at    DateTime?
+
+  // Relaciones
+  session     chat_sessions @relation(fields: [session_id], references: [id])
+  enfermedad  enfermedades? @relation(fields: [enfermedad_id], references: [id])
+
+  @@map("preclasificaciones")
+}
+
+// public.usuarios
+model usuarios {
+  id               String   @id @default(uuid())
+  nombre           String?
+  edad             Int?
+  sexo             String?     // USER-DEFINED
+  departamento_id  String?
+  municipio_id     String?
+  created_at       DateTime?
+  fcm_token        String? @unique
+
+  // Relaciones
+  departamento departamentos? @relation(fields: [departamento_id], references: [id])
+  municipio    municipios?    @relation(fields: [municipio_id], references: [id])
+  sessions     chat_sessions[]
+
+  @@map("usuarios")
+}
+
+// public.spatial_ref_sys
+model spatial_ref_sys {
+  srid      Int    @id
+  auth_name String?
+  auth_srid Int?
+  srtext    String?
+  proj4text String?
+
+  @@map("spatial_ref_sys")
+}
+
+// public.tabprueba
+model tabprueba {
+  id          String  @id @default(uuid())
+  lat         Float?
+  lng         Float?
+  nombre      String?
+  descripcion String?
+  fecha       DateTime?
+
+  @@map("tabprueba")
 }
