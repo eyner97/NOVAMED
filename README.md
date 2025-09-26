@@ -62,4 +62,4 @@ npm install
 ---
 
 **Autores:**  
-Proyecto desarrollado por [eyner97](https://github.com/eyner97) y colaboradores.
+Proyecto desarrollado por equipo [NovaMed](https://github.com/eyner97).
