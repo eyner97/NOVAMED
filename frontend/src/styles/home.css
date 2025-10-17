@@ -349,6 +349,36 @@ body { margin: 0; overflow: hidden; }
 }
 .hm-user-circle:focus-visible { box-shadow: 0 0 0 3px rgba(43,94,175,.45); }
 
+/* Contenedor del nombre y el ícono */
+.hm-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre el nombre y el ícono */
+  cursor: pointer;
+}
+
+/* Nombre del usuario */
+.hm-user-name {
+  color: var(--blue); /* Azul principal */
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}
+
+/* Ícono de usuario */
+.hm-user-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
 /* ====== AUTH MODAL (GLASS) ====== */
 .hm-auth-overlay{
   position: fixed;

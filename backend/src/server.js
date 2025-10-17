@@ -3,6 +3,7 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import { initializeAI, isAiReady, askAI } from "../utils/aiClient.js";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -16,15 +17,12 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-// backend/src/server.js
 app.listen(4000, '0.0.0.0', () => console.log('API en 4000'));
 
 // ✅ Healthcheck (segundo código)
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-// --------------------
 // 🟢 Parte de tu código (ubicaciones en memoria)
-// --------------------
 let ubicaciones = [
   { id: 1, nombre: "Ejemplo", lat: 12.123, lng: -86.123, fecha: new Date() },
 ];
@@ -757,4 +755,38 @@ app.get('/api/tips', async (req, res) => {
 // --------------------
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
+// AUTH
+// REGISTRO por teléfono
+app.post("/api/auth/register-phone", async (req, res) => {
+  const { nombre, telefono, password } = req.body;
+  if (!nombre || !telefono || !password) {
+    return res.status(400).json({ error: "Todos los campos son requeridos" });
+  }
+  // Verifica si ya existe
+  const existe = await prisma.usuarios.findUnique({ where: { telefono } });
+  if (existe) return res.status(409).json({ error: "El teléfono ya está registrado" });
+
+  const hash = await bcrypt.hash(password, 10);
+  const usuario = await prisma.usuarios.create({
+    data: { nombre, telefono, password: hash },
+  });
+  res.json({ ok: true, usuario: { id: usuario.id, nombre: usuario.nombre, telefono: usuario.telefono } });
+});
+
+// LOGIN por teléfono
+app.post("/api/auth/login-phone", async (req, res) => {
+  const { telefono, password } = req.body;
+  if (!telefono || !password) {
+    return res.status(400).json({ error: "Teléfono y contraseña requeridos" });
+  }
+  const usuario = await prisma.usuarios.findUnique({ where: { telefono } });
+  if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+  const ok = await bcrypt.compare(password, usuario.password || "");
+  if (!ok) return res.status(401).json({ error: "Contraseña incorrecta" });
+
+  // Devuelve solo los datos necesarios
+  res.json({ ok: true, usuario: { id: usuario.id, nombre: usuario.nombre, telefono: usuario.telefono } });
 });

@@ -335,16 +335,45 @@ export async function syncFromSupabase() {
   for (const enf of enfermedades) {
     const id = toStr(enf.id);
     const nombre = toStr(enf.nombre);
-    await prisma.enfermedades.upsert({
-      where: { nombre }, // Cambia aquí
-      update: {
-        descripcion: toStr(enf.descripcion),
-        signos_alarma: toStr(enf.signos_alarma),
-        nivel_riesgo: toStr(enf.nivel_riesgo),
-        etiquetas: toStr(enf.etiquetas),
-        created_at: toDate(enf.created_at),
-      },
-      create: {
+
+    // 1) Si ya existe por id -> actualizar
+    const existsById = await prisma.enfermedades.findUnique({ where: { id } });
+    if (existsById) {
+      await prisma.enfermedades.update({
+        where: { id },
+        data: {
+          nombre,
+          descripcion: toStr(enf.descripcion),
+          signos_alarma: toStr(enf.signos_alarma),
+          nivel_riesgo: toStr(enf.nivel_riesgo),
+          etiquetas: toStr(enf.etiquetas),
+          created_at: toDate(enf.created_at),
+        },
+      });
+      continue;
+    }
+
+    // 2) Si existe por nombre pero con distinto id -> actualizar ese registro para usar el id de Supabase
+    const existsByName = await prisma.enfermedades.findUnique({ where: { nombre } });
+    if (existsByName) {
+      // actualiza el registro existente (cambia el id al id de Supabase y actualiza campos)
+      await prisma.enfermedades.update({
+        where: { id: existsByName.id },
+        data: {
+          id, // reasigna PK local al id de Supabase
+          descripcion: toStr(enf.descripcion),
+          signos_alarma: toStr(enf.signos_alarma),
+          nivel_riesgo: toStr(enf.nivel_riesgo),
+          etiquetas: toStr(enf.etiquetas),
+          created_at: toDate(enf.created_at),
+        },
+      });
+      continue;
+    }
+
+    // 3) No existe -> crear con id de Supabase
+    await prisma.enfermedades.create({
+      data: {
         id,
         nombre,
         descripcion: toStr(enf.descripcion),
@@ -368,12 +397,36 @@ export async function syncFromSupabase() {
   for (const s of sintomas) {
     const id = toStr(s.id);
     const nombre = toStr(s.nombre);
-    await prisma.sintomas.upsert({
-      where: { nombre }, // Cambia aquí
-      update: {
-        created_at: toDate(s.created_at),
-      },
-      create: {
+
+    // Si existe por id -> actualizar
+    const existsById = await prisma.sintomas.findUnique({ where: { id } });
+    if (existsById) {
+      await prisma.sintomas.update({
+        where: { id },
+        data: {
+          nombre,
+          created_at: toDate(s.created_at),
+        },
+      });
+      continue;
+    }
+
+    // Si existe por nombre -> reasignar id y actualizar
+    const existsByName = await prisma.sintomas.findUnique({ where: { nombre } });
+    if (existsByName) {
+      await prisma.sintomas.update({
+        where: { id: existsByName.id },
+        data: {
+          id,
+          created_at: toDate(s.created_at),
+        },
+      });
+      continue;
+    }
+
+    // No existe -> crear
+    await prisma.sintomas.create({
+      data: {
         id,
         nombre,
         created_at: toDate(s.created_at),

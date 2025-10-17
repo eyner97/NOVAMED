@@ -153,3 +153,24 @@ export async function getTips() {
   const res = await fetch(`${API_URL}/api/tips`);
   return res.json();
 }
+
+// --- Autenticación ---
+export async function registerPhone(nombre, telefono, password) {
+  const res = await fetch(`${API_URL}/api/auth/register-phone`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre, telefono, password }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || "Error registrando");
+  return res.json();
+}
+
+export async function loginPhone(telefono, password) {
+  const res = await fetch(`${API_URL}/api/auth/login-phone`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telefono, password }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || "Error iniciando sesión");
+  return res.json();
+}

@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { askChat } from "../services/api"; // Importar la función de la API
+import { askChat, registerPhone, loginPhone } from "../services/api";
 import "../styles/home.css";
 
 export default function Home() {
@@ -307,6 +307,45 @@ export default function Home() {
     [inputValue, isReplying, listening, speakingId]
   );
 
+  const [usuario, setUsuario] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("usuario")) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Al cargar, intenta restaurar sesión
+  useEffect(() => {
+    const u = localStorage.getItem("usuario");
+    if (u) setUsuario(JSON.parse(u));
+  }, []);
+
+  // Maneja el envío del formulario de autenticación
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+
+    if (authMethod === "phone" && authTab === "login") {
+      const telefono = e.target["hm-phone"].value;
+      const password = e.target["hm-phone-pass"].value;
+
+      try {
+        const data = await loginPhone(telefono, password); // Llama al endpoint
+        setUsuario(data.usuario); // Guarda el usuario en el estado
+        localStorage.setItem("usuario", JSON.stringify(data.usuario)); // Guarda en localStorage
+        setShowAuth(false); // Cierra el modal de autenticación
+      } catch (err) {
+        alert(err.message); // Muestra el error si las credenciales son incorrectas
+      }
+    }
+  }
+
+  // Cerrar sesión
+  function handleLogout() {
+    setUsuario(null);
+    localStorage.removeItem("usuario");
+  }
+
   return (
     <div className="hm-root">
       <header className="hm-header">
@@ -480,35 +519,43 @@ export default function Home() {
       </main>
 
       <footer className="hm-footer">
-        <div className="hm-footer-left">
-          <svg viewBox="0 0 24 24" className="hm-footer-pin" aria-hidden>
-            <path
-              fill="#1d64c2"
-              d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zM12 11.5A2.5 2.5 0 1 1 12 6.5 2.5 2.5 0 0 1 12 11.5z"
-            />
-          </svg>
-          <span className="hm-location">{ubicacion}</span>
-        </div>
+  <div className="hm-footer-left">
+    <svg viewBox="0 0 24 24" className="hm-footer-pin" aria-hidden>
+      <path
+        fill="#1d64c2"
+        d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zM12 11.5A2.5 2.5 0 1 1 12 6.5 2.5 2.5 0 0 1 12 11.5z"
+      />
+    </svg>
+    <span className="hm-location">{ubicacion}</span>
+  </div>
 
-        <div className="hm-footer-right">
-          {/* Botón de usuario funcional */}
-          <div
-            className="hm-user-circle"
-            role="button"
-            tabIndex={0}
-            onClick={() => setShowAuth(true)}
-            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setShowAuth(true)}
-            aria-label="Abrir autenticación"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden>
-              <path
-                fill="#fff"
-                d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"
-              />
-            </svg>
-          </div>
-        </div>
-      </footer>
+  <div className="hm-footer-right">
+    <div
+      className="hm-user-info"
+      role="button"
+      tabIndex={0}
+      onClick={() => (usuario ? handleLogout() : setShowAuth(true))}
+      onKeyDown={(e) =>
+        (e.key === "Enter" || e.key === " ") &&
+        (usuario ? handleLogout() : setShowAuth(true))
+      }
+      aria-label={usuario ? "Cerrar sesión" : "Abrir autenticación"}
+      title={usuario ? "Cerrar sesión" : "Iniciar sesión"}
+    >
+      {usuario && (
+        <span className="hm-user-name">{usuario.nombre}</span>
+      )}
+      <div className="hm-user-circle">
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path
+            fill="#fff"
+            d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+</footer>
 
       {/* ===== MODAL AUTH (GLASS) ===== */}
       {showAuth && (
@@ -597,13 +644,24 @@ export default function Home() {
             {/* Formulario */}
             <form
               className="hm-auth-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                console.log("Auth submit:", { authTab, authMethod });
-              }}
+              onSubmit={handleAuthSubmit}
             >
               {authMethod === "phone" && (
                 <>
+                  {authTab === "register" && (
+                    <>
+                      <label className="hm-auth-label" htmlFor="hm-name">
+                        Nombre completo
+                      </label>
+                      <input
+                        id="hm-name"
+                        type="text"
+                        className="hm-auth-input"
+                        placeholder="Tu nombre completo"
+                        required
+                      />
+                    </>
+                  )}
                   <label className="hm-auth-label" htmlFor="hm-phone">
                     Número de celular
                   </label>
@@ -613,6 +671,16 @@ export default function Home() {
                     inputMode="tel"
                     className="hm-auth-input"
                     placeholder="+505 8888 8888"
+                    required
+                  />
+                  <label className="hm-auth-label" htmlFor="hm-phone-pass">
+                    Contraseña
+                  </label>
+                  <input
+                    id="hm-phone-pass"
+                    type="password"
+                    className="hm-auth-input"
+                    placeholder="••••••••"
                     required
                   />
                 </>

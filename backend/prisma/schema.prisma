@@ -267,6 +267,8 @@ model usuarios {
   municipio_id     String?
   created_at       DateTime?
   fcm_token        String? @unique
+  telefono         String?  @unique // <-- Agregado para número de teléfono
+  password         String?          // <-- Agregado para contraseña
 
   // Relaciones
   departamento departamentos? @relation(fields: [departamento_id], references: [id])
