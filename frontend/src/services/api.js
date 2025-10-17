@@ -125,17 +125,31 @@ export async function associateServicioToJornada(jornadaId, servicioId) {
 }
 
 // --- Chat con IA ---
-export async function askChat(prompt) {
+export async function askChat(prompt, departamento) {
   const res = await fetch(`${API_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, departamento }),
   });
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({})); // Intenta obtener el error del body
+    const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || "Error al comunicarse con el asistente de IA");
   }
 
+  return res.json();
+}
+
+// --- Nuevos endpoints sugeridos ---
+export async function getTemas() {
+  const res = await fetch(`${API_URL}/api/temas`);
+  return res.json();
+}
+export async function getArticulos() {
+  const res = await fetch(`${API_URL}/api/articulos`);
+  return res.json();
+}
+export async function getTips() {
+  const res = await fetch(`${API_URL}/api/tips`);
   return res.json();
 }

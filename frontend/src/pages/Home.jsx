@@ -1,5 +1,4 @@
-﻿// src/pages/Home.jsx
-import { useEffect, useRef, useState, useMemo } from "react";
+﻿import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { askChat } from "../services/api"; // Importar la función de la API
 import "../styles/home.css";
@@ -21,6 +20,7 @@ export default function Home() {
 
   // Estado para la ubicación
   const [ubicacion, setUbicacion] = useState("Cargando ubicación...");
+  const [departamento, setDepartamento] = useState(null);
 
   // Estado para el reconocimiento de voz
   const [listening, setListening] = useState(false);
@@ -157,7 +157,6 @@ export default function Home() {
     if (!chatActive) setChatActive(true);
     setIsReplying(true);
 
-    // Mostrar indicador de "escribiendo..."
     const tempAssistantId = Date.now() + 1;
     setMessages((prev) => [
       ...prev,
@@ -165,18 +164,16 @@ export default function Home() {
     ]);
 
     try {
-      // Llamar a la API de la IA
-      const { response } = await askChat(text);
-      // Reemplazar el "..." con la respuesta real
+      // Pasa el departamento como argumento extra
+      const { response } = await askChat(text, departamento);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === tempAssistantId ? { ...msg, content: response } : msg
         )
       );
-      // Si el último mensaje fue dictado, lee la respuesta
       if (lastUsedDictation) {
         speakText(response, tempAssistantId);
-        setLastUsedDictation(false); // <-- RESETEA después de usar
+        setLastUsedDictation(false);
       }
     } catch (error) {
       setMessages((prev) =>
@@ -228,14 +225,22 @@ export default function Home() {
               data.display_name ||
               "Ubicación desconocida"
           );
+          // Extrae el departamento (en Nicaragua suele estar en state o county)
+          setDepartamento(
+            data.address?.state ||
+            data.address?.county ||
+            data.address?.region ||
+            null
+          );
         } catch {
           setUbicacion("No se pudo obtener la ciudad");
+          setDepartamento(null);
         }
       },
       (err) => {
         setUbicacion("Activa tu ubicación");
+        setDepartamento(null);
         if (err.code === 1) {
-          // PERMISSION_DENIED
           setUbicacion("Permiso de ubicación denegado. Actívalo en la configuración del navegador.");
         }
       },

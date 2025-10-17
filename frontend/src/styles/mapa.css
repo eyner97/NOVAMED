@@ -245,7 +245,7 @@ body { margin: 0; overflow: hidden; }
   .mapa-main { grid-template-columns: 200px 1fr 240px; }
 }
 @media (max-width: 900px) {
-  .mapa-main { grid-template-columns: 1fr; grid-template-rows: 240px 1fr 260px; }
+  .mapa-main { grid-template-columns: 1fr; grid-template-rows: 200px 1fr 260px; }
   .sidebar-left, .sidebar-right { overflow: auto; }
 }
 @media (max-height: 700px) {
@@ -260,7 +260,7 @@ body { margin: 0; overflow: hidden; }
   flex-direction: column;
 
   /* Espacio extra al fondo */
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   padding-bottom: 32px;   /* <--- Aumenta este valor para más espacio inferior */
 
   /* Altura disponible sin recortarse demasiado */

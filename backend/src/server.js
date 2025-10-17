@@ -16,6 +16,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// backend/src/server.js
+app.listen(4000, '0.0.0.0', () => console.log('API en 4000'));
+
 // ✅ Healthcheck (segundo código)
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
@@ -272,7 +275,7 @@ setInterval(() => {
 // --- Endpoint para el Chat con IA ---
 app.post("/api/chat", async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, departamento } = req.body;
     if (!prompt) return res.status(400).json({ error: "El 'prompt' es requerido." });
 
     // Palabras clave para clínicas móviles
@@ -377,6 +380,76 @@ ${enfermedadesArr.length ? enfermedadesArr.join("\n") : "No hay enfermedades reg
 
 Utiliza estos datos para responder si el usuario menciona síntomas, enfermedades o malestares.
       `;
+    }
+
+
+    // Palabras clave para hospitales, centros y puestos de salud
+    const puestosKeywords = [
+      "hospital", "hospitales", "hospital público", "hospital privado", "hospital general", "hospital nacional",
+      "centro de salud", "centros de salud", "centro salud", "centros salud",
+      "puesto de salud", "puestos de salud", "puesto salud", "puestos salud"
+    ];
+    if (puestosKeywords.some(k => promptLower.includes(k))) {
+      // 1. Consulta departamentos → municipios → puestos_salud
+      const departamentos = await prisma.departamentos.findMany({
+        orderBy: { nombre: "asc" },
+        include: {
+          municipios: {
+            orderBy: { nombre: "asc" },
+            include: {
+              puestos: {
+                orderBy: { nombre: "asc" },
+                select: {
+                  nombre: true,
+                  tipo: true,
+                  direccion: true,
+                  telefono: true,
+                  lat: true,
+                  lng: true,
+                  municipio: {
+                    select: { nombre: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Si se recibió el nombre del departamento, filtra solo ese
+      let departamentosFiltrados = departamentos;
+      if (departamento) {
+        const depNorm = departamento.trim().toLowerCase();
+        departamentosFiltrados = departamentos.filter(dep =>
+          dep.nombre.trim().toLowerCase() === depNorm
+        );
+      }
+
+      const departamentosArr = departamentosFiltrados.map(dep => {
+        const municipiosArr = dep.municipios.map(mun => {
+          const puestosArr = mun.puestos.map(puesto => {
+            return `  - ${puesto.tipo ? puesto.tipo.charAt(0).toUpperCase() + puesto.tipo.slice(1) : "Unidad"}: ${puesto.nombre}
+    Dirección: ${puesto.direccion || "N/D"}
+    Teléfono: ${puesto.telefono || "N/D"}
+    Municipio: ${puesto.municipio?.nombre || mun.nombre}
+    Lat: ${puesto.lat ?? "N/D"}
+    Lng: ${puesto.lng ?? "N/D"}`;
+          }).filter(Boolean);
+          return puestosArr.length
+            ? `• Municipio: ${mun.nombre}\n${puestosArr.join("\n")}`
+            : null;
+        }).filter(Boolean);
+        return municipiosArr.length
+          ? `=== Departamento: ${dep.nombre} ===\n${municipiosArr.join("\n\n")}`
+          : null;
+      }).filter(Boolean);
+
+      extraInfo += `
+Información actual de hospitales, centros y puestos de salud en Nicaragua:
+${departamentosArr.length ? departamentosArr.join("\n\n") : "No hay unidades registradas."}
+
+Utiliza estos datos para responder si el usuario pregunta por hospitales, centros o puestos de salud.
+  `;
     }
 
     // Palabras clave para jornadas/eventos de salud
@@ -649,6 +722,34 @@ app.post("/api/jornadas/:jornadaId/servicios", async (req, res) => {
     console.error(e);
     res.status(500).json({ error: "Error asociando servicio a la jornada" });
   }
+});
+
+// Carrusel de temas
+app.get('/api/temas', async (_, res) => {
+  const { data, error } = await supabaseAdmin
+    .from('v_temas_con_portada')
+    .select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// Artículos por tema
+app.get('/api/articulos', async (req, res) => {
+  const { tema, limit = 10 } = req.query;
+  let q = supabaseAdmin.from('v_articulos_recientes').select('*').limit(+limit);
+  if (tema) q = q.eq('tema', tema);
+  const { data, error } = await q;
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// Tip del día
+app.get('/api/tips', async (req, res) => {
+  const { limit = 1 } = req.query;
+  const { data, error } = await supabaseAdmin
+    .from('v_tips').select('*').limit(+limit);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
 // --------------------
